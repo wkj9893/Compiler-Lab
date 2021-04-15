@@ -12,6 +12,9 @@ interface HeaderProps {
     setCode: React.Dispatch<React.SetStateAction<string>>;
     setTokens: React.Dispatch<React.SetStateAction<Token[]>>;
     setAst: React.Dispatch<React.SetStateAction<Node | null>>;
+    setTableVisibility: React.Dispatch<
+        React.SetStateAction<"hidden" | "visible">
+    >;
 }
 
 const { predict } = parser(rules);
@@ -61,6 +64,7 @@ export default function Header(props: HeaderProps) {
                 <Button
                     onClick={() => {
                         props.setTokens(tokenizer(props.code));
+                        props.setTableVisibility("visible");
                     }}
                 >
                     <Typography variant="h6" style={{ fontSize: "18px" }}>

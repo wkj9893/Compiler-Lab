@@ -1,16 +1,23 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .App {
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    margin-top: 30px;
     align-items: center;
+    margin-top: 30px;
+    margin-right: 360px;
+    gap: 30px;
 }
 
 .table {
     max-height: 480px;
     margin-top: 48px;
-}
-
-.button {
-    width: fit-content;
+    margin-left: 48px;
 }

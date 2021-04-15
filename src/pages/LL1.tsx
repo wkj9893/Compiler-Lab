@@ -43,18 +43,23 @@ export default function LL1() {
         const r1 = parseRules(grammar);
         const r2 = leftFactoring(r1);
         const r3 = removeLeftRecursion(r2);
-        const { firstSets, followSets, selectSets, predictTable } = parser(r3);
+        const {
+            firstSets,
+            followSets,
+            selectSets,
+            predictTable,
+            NonTerminals,
+        } = parser(r3);
         setRawRules(r1);
         setLeftFactor(r2);
         setRules(r3);
 
-        let keys = Object.keys(firstSets);
         let array = [];
-        for (let i = 0; i < keys.length; i++) {
+        for (const Nonterminal of NonTerminals) {
             array.push({
-                Nonterminal: keys[i],
-                first: firstSets[keys[i]].join("         "),
-                follow: followSets[keys[i]].join("         "),
+                Nonterminal,
+                first: firstSets.get(Nonterminal)!.join(" "),
+                follow: followSets.get(Nonterminal)!.join(" "),
             });
         }
         setFirstFollow(array);
@@ -64,12 +69,20 @@ export default function LL1() {
             array.push({
                 id: i,
                 production: `${r3[i].left} -> ${r3[i].right.join(" ")}`,
-                set: selectSets[i].join("         "),
+                set: selectSets.get(i)!.join(" "),
             });
         }
         setSelect(array);
-        setPredict(predictTable);
-        console.log(JSON.stringify(predict));
+        const temp: any = {};
+        for (const Nonterminal of NonTerminals) {
+            let obj: any = {};
+            for (const [key, value] of predictTable.get(Nonterminal)!) {
+                obj[key] = value;
+            }
+            temp[Nonterminal] = obj;
+        }
+        setPredict(temp);
+        console.log(JSON.stringify(predict, null, 1));
     }
 
     return (
@@ -77,7 +90,7 @@ export default function LL1() {
             <Typography variant="h5">Write your LL(1) grammar:</Typography>
             <Editor
                 height="50vh"
-                width="160vh"
+                width="120vh"
                 value={grammar}
                 onChange={(value) => {
                     if (value) {
@@ -87,19 +100,14 @@ export default function LL1() {
                 language="plaintext"
                 options={{ fontSize: "16px" }}
             />
-            <Button
-                variant="contained"
-                color="primary"
-                className="button"
-                onClick={handleClick}
-            >
+            <Button variant="contained" color="primary" onClick={handleClick}>
                 submit
             </Button>
 
             <Typography variant="h5">提取左公因子 :</Typography>
             <Editor
                 height="50vh"
-                width="160vh"
+                width="120vh"
                 value={rulesToInput(leftFactor)}
                 language="plaintext"
                 options={{ fontSize: "16px" }}
@@ -107,7 +115,7 @@ export default function LL1() {
             <Typography variant="h5">消除左递归:</Typography>
             <Editor
                 height="50vh"
-                width="160vh"
+                width="120vh"
                 value={rulesToInput(rules)}
                 language="plaintext"
                 options={{ fontSize: "16px" }}
@@ -160,9 +168,13 @@ export default function LL1() {
             </TableContainer>
             <Typography variant="h5">Predict Table</Typography>
             <Editor
-                height="50vh"
-                width="160vh"
-                value={JSON.stringify(predict, null, 1)}
+                height="80vh"
+                width="120vh"
+                value={
+                    Object.keys(predict).length === 0
+                        ? ""
+                        : JSON.stringify(predict, null, 1)
+                }
                 language="json"
                 options={{ fontSize: "16px" }}
             />

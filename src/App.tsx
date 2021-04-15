@@ -4,6 +4,13 @@ import Editor from "@monaco-editor/react";
 import Typography from "@material-ui/core/Typography";
 import { Token, Node } from "./compiler/types";
 import Header from "./components/Header";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
 
 function App() {
     const [code, setCode] = useState(`for(int i=0;i<10;i++) {
@@ -14,6 +21,9 @@ function App() {
     const [ast, setAst] = useState<Node | null>(null);
     const [lexicalError, setLexicalError] = useState("");
     const [syntacticError, setSyntacticError] = useState("");
+    const [tableVisibility, setTableVisibility] = useState<
+        "hidden" | "visible"
+    >("hidden");
 
     return (
         <div className="App">
@@ -22,11 +32,12 @@ function App() {
                 setCode={setCode}
                 setTokens={setTokens}
                 setAst={setAst}
+                setTableVisibility={setTableVisibility}
             />
             <main>
                 <div className="Editor">
                     <Editor
-                        height="85vh"
+                        height="80vh"
                         width="100vh"
                         value={code}
                         onChange={(value) => {
@@ -38,13 +49,40 @@ function App() {
                         options={{ fontSize: "18px" }}
                     />
                 </div>
-                <div className="Result">
-                    {tokens.map((token) => (
-                        <Typography variant="h6" key={token.id}>
-                            {`${token.input} ${token.name}   ${token.value}  `}
-                        </Typography>
-                    ))}
-                </div>
+                <TableContainer
+                    className="table"
+                    component={Paper}
+                    style={{
+                        visibility: tokens.length > 0 ? "visible" : "hidden",
+                    }}
+                >
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>LEXEMES</TableCell>
+                                <TableCell align="left">TOKEN NAME</TableCell>
+                                <TableCell align="left">
+                                    ATTRIBUTE VALUE
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {tokens.map((token) => (
+                                <TableRow key={token.id}>
+                                    <TableCell component="th" scope="row">
+                                        {token.input}
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {token.name}
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {token.value}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </main>
             <Editor
                 height="85vh"

@@ -136,7 +136,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: ";",
                 name: "SEMI",
-                value: ";",
+                value: "_",
             });
             current++;
             continue;
@@ -147,7 +147,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: ",",
                 name: "COMMA",
-                value: ",",
+                value: "_",
             });
             current++;
             continue;
@@ -169,7 +169,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "=",
                     name: "ASSIGNOP",
-                    value: "=",
+                    value: "_",
                 });
                 current++;
                 continue;
@@ -219,7 +219,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "++",
                     name: "INCREMENT",
-                    value: "++",
+                    value: "_",
                 });
                 current = next + 1;
                 continue;
@@ -228,7 +228,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "+",
                     name: "PLUS",
-                    value: "+",
+                    value: "_",
                 });
                 current++;
                 continue;
@@ -241,7 +241,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "--",
                     name: "DECREMENT",
-                    value: "--",
+                    value: "_",
                 });
                 current = next + 1;
                 continue;
@@ -250,7 +250,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "-",
                     name: "MINUS",
-                    value: "-",
+                    value: "_",
                 });
                 current++;
                 continue;
@@ -261,7 +261,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "*",
                 name: "STAR",
-                value: "*",
+                value: "_",
             });
             current++;
             continue;
@@ -271,7 +271,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "*",
                 name: "MOD",
-                value: "%",
+                value: "_",
             });
             current++;
             continue;
@@ -284,17 +284,23 @@ export default function tokenizer(input: string): Array<Token> {
                 while (!NEWLINE.test(input[current])) {
                     current++;
                 }
+                line++;
+                continue;
             }
             //  multilne comments
             else if (input[next] === "*") {
                 current = next;
                 while (true) {
                     current++;
+                    if (NEWLINE.test(input[current])) {
+                        line++;
+                    }
                     if (input[current] === "*" && input[++current] === "/") {
                         current++;
                         break;
                     }
                 }
+                continue;
             }
             // a single slash
             else {
@@ -302,7 +308,7 @@ export default function tokenizer(input: string): Array<Token> {
                     id: id++,
                     input: "/",
                     name: "DIV",
-                    value: "/",
+                    value: "_",
                 });
                 current++;
                 continue;
@@ -314,7 +320,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "&&",
                 name: "AND",
-                value: "&&",
+                value: "_",
             });
             current += 2;
             continue;
@@ -324,7 +330,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "||",
                 name: "OR",
-                value: "||",
+                value: "_",
             });
             current += 2;
             continue;
@@ -334,7 +340,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: ".",
                 name: "DOT",
-                value: ".",
+                value: "_",
             });
             current++;
             continue;
@@ -344,7 +350,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "!",
                 name: "NOT",
-                value: "!",
+                value: "_",
             });
             current++;
             continue;
@@ -354,7 +360,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "(",
                 name: "LP",
-                value: "(",
+                value: "_",
             });
             current++;
             continue;
@@ -365,7 +371,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: ")",
                 name: "RP",
-                value: ")",
+                value: "_",
             });
             current++;
             continue;
@@ -375,7 +381,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "[",
                 name: "LB",
-                value: "[",
+                value: "_",
             });
             current++;
             continue;
@@ -385,7 +391,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "]",
                 name: "RB",
-                value: "]",
+                value: "_",
             });
             current++;
             continue;
@@ -396,7 +402,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "{",
                 name: "LC",
-                value: "{",
+                value: "_",
             });
             current++;
             continue;
@@ -406,7 +412,7 @@ export default function tokenizer(input: string): Array<Token> {
                 id: id++,
                 input: "}",
                 name: "RC",
-                value: "}",
+                value: "_",
             });
             current++;
             continue;
@@ -437,14 +443,14 @@ export default function tokenizer(input: string): Array<Token> {
                         id: id++,
                         input: value,
                         name: "TYPE",
-                        value: value,
+                        value: "_",
                     });
                 } else {
                     tokens.push({
                         id: id++,
                         input: value,
                         name: value.toUpperCase(),
-                        value: value,
+                        value: "_",
                     });
                 }
             } else {

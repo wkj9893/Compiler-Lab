@@ -232,15 +232,21 @@ export default function parser(rules: Array<Rule>) {
      * @param rules
      * @returns firstSets and followSets and predictSets
      */
-    let firstSets: any = {};
-    let followSets: any = {};
-    let selectSets: any = {};
-    let predictTable: any = {};
+    let NonTerminals: Set<string> = new Set();
+    let firstSets: Map<string, Array<string>> = new Map();
+    let followSets: Map<string, Array<string>> = new Map();
+    let selectSets: Map<number, Array<string>> = new Map();
+    let predictTable: Map<string, Map<string, number>> = new Map();
 
-    rules.forEach(({ left }) => {
-        firstSets[left] = [];
-        followSets[left] = [];
-        predictTable[left] = {};
+    rules.forEach(({ left }, index) => {
+        NonTerminals.add(left);
+        selectSets.set(index, []);
+        predictTable.set(left, new Map());
+    });
+
+    NonTerminals.forEach((NonTerminal) => {
+        firstSets.set(NonTerminal, []);
+        followSets.set(NonTerminal, []);
     });
 
     function union(arr1: string[], arr2: string[]) {
@@ -248,7 +254,7 @@ export default function parser(rules: Array<Rule>) {
     }
 
     function isNonterminal(item: string) {
-        return firstSets[item];
+        return NonTerminals.has(item);
     }
 
     function getFristSet(set: string[], right: string[]): string[] {
@@ -256,18 +262,18 @@ export default function parser(rules: Array<Rule>) {
             if (!isNonterminal(right[0])) {
                 return union(set, [right[0]]);
             } else {
-                return union(set, firstSets[right[0]]);
+                return union(set, firstSets.get(right[0])!);
             }
         } else if (right.length >= 1) {
             if (!isNonterminal(right[0])) {
                 return union(set, [right[0]]);
             } else {
-                if (!firstSets[right[0]].includes("ε")) {
-                    return union(set, firstSets[right[0]]);
+                if (!firstSets.get(right[0])!.includes("ε")) {
+                    return union(set, firstSets.get(right[0])!);
                 } else {
-                    const temp = firstSets[right[0]].filter(
-                        (v: string) => v != "ε"
-                    );
+                    const temp = firstSets
+                        .get(right[0])!
+                        .filter((v: string) => v != "ε");
                     set = union(set, temp);
                     return getFristSet(set, right.slice(1));
                 }
@@ -277,14 +283,15 @@ export default function parser(rules: Array<Rule>) {
         }
     }
 
-    function getFristSets(): object {
+    function getFristSets(): Map<string, Array<string>> {
         while (true) {
             let isSetChanged = false;
             for (const { left, right } of rules) {
-                const set = getFristSet(firstSets[left], right);
+                const a = firstSets.get(left);
+                const set = getFristSet(firstSets.get(left)!, right);
 
-                if (firstSets[left].length !== set.length) {
-                    firstSets[left] = set;
+                if (firstSets.get(left)!.length !== set.length) {
+                    firstSets.set(left, set);
                     isSetChanged = true;
                 }
             }
@@ -294,15 +301,15 @@ export default function parser(rules: Array<Rule>) {
         }
         return firstSets;
     }
-    function getFollowSet(left: string, right: string[]) {
+    function getFollowSet(left: string, right: string[]): string[] {
         if (right.length === 1) {
-            return [...followSets[left]];
+            return followSets.get(left)!;
         } else {
             if (isNonterminal(right[1])) {
-                let set: Array<string> = firstSets[right[1]].filter(
-                    (item: string) => item != "ε"
-                );
-                if (firstSets[right[1]].includes("ε")) {
+                let set: Array<string> = firstSets
+                    .get(right[1])!
+                    .filter((item: string) => item != "ε");
+                if (firstSets.get(right[1])!.includes("ε")) {
                     set = union(
                         set,
                         getFollowSet(left, [right[0], ...right.slice(2)])
@@ -315,8 +322,8 @@ export default function parser(rules: Array<Rule>) {
         }
     }
 
-    function getFollowSets(): object {
-        followSets[rules[0].left].push("$");
+    function getFollowSets(): Map<string, Array<string>> {
+        followSets.set(rules[0].left, ["$"]);
         while (true) {
             let isSetChanged = false;
             for (const { left, right } of rules) {
@@ -325,11 +332,11 @@ export default function parser(rules: Array<Rule>) {
                         continue;
                     }
                     const set = union(
-                        followSets[value],
+                        followSets.get(value)!,
                         getFollowSet(left, right.slice(index))
                     );
-                    if (followSets[value].length !== set.length) {
-                        followSets[value] = set;
+                    if (followSets.get(value)!.length !== set.length) {
+                        followSets.set(value, set);
                         isSetChanged = true;
                     }
                 }
@@ -341,43 +348,45 @@ export default function parser(rules: Array<Rule>) {
         return followSets;
     }
 
-    function getSelectSet(left: string, right: string[]) {
+    function getSelectSet(left: string, right: string[]): string[] {
         if (!isNonterminal(right[0])) {
             if (right[0] === "ε") {
-                return followSets[left];
+                return followSets.get(left)!;
             }
             return [right[0]];
         }
-        let set = firstSets[right[0]].filter((item: string) => item != "ε");
+        let set = firstSets
+            .get(right[0])!
+            .filter((item: string) => item != "ε");
         if (right.length === 1) {
             return set;
         } else {
-            if (firstSets[right[0]].includes("ε")) {
+            if (firstSets.get(right[0])!.includes("ε")) {
                 set = union(set, getSelectSet(left, right.slice(1)));
             }
         }
         return set;
     }
-    function getSelectSets(): object {
+    function getSelectSets(): Map<number, Array<string>> {
         let index = 0;
         for (const { left, right } of rules) {
-            selectSets[index] = getSelectSet(left, right);
+            selectSets.set(index, getSelectSet(left, right));
             index++;
         }
         return selectSets;
     }
 
     function getPredictTable() {
-        for (let j = 0; j < rules.length; j++) {
-            for (let k = 0; k < selectSets[j].length; k++) {
-                const key = selectSets[j][k];
-                if (!predictTable[rules[j].left][key]) {
-                    predictTable[rules[j].left][key] = j;
+        for (let i = 0; i < rules.length; i++) {
+            for (let j = 0; j < selectSets.get(i)!.length; j++) {
+                const key = selectSets.get(i)![j];
+                if (!predictTable.get(rules[i].left)?.get(key)) {
+                    predictTable.get(rules[i].left)?.set(key, i);
                 } else {
                     console.log(
                         key,
-                        predictTable[rules[j].left][key],
-                        j,
+                        predictTable.get(rules[i].left)?.get(key),
+                        i,
                         "出现冲突"
                     );
                 }
@@ -385,7 +394,7 @@ export default function parser(rules: Array<Rule>) {
         }
         return predictTable;
     }
-    function predict(tokens: Array<Token>) {
+    function predict(tokens: Array<Token>): Node {
         let AST: Node = { type: rules[0].left };
         let AST_current = 0;
         tokens.push({
@@ -398,8 +407,9 @@ export default function parser(rules: Array<Rule>) {
         let current = 0;
         while (stack.length > 1 && current < tokens.length) {
             if (isNonterminal(stack[stack.length - 1])) {
-                const index =
-                    predictTable[stack[stack.length - 1]][tokens[current].name];
+                const index = predictTable
+                    .get(stack[stack.length - 1])
+                    ?.get(tokens[current].name);
                 if (index !== undefined) {
                     console.log(
                         `${rules[index].right}替换${stack[stack.length - 1]}`
@@ -431,7 +441,7 @@ export default function parser(rules: Array<Rule>) {
                     stack.pop();
                     current++;
                 } else {
-                    console.log("匹配不成功", tokens[current].id);
+                    console.log("匹配不成功", tokens[current]);
                     break;
                 }
             }
@@ -473,5 +483,12 @@ export default function parser(rules: Array<Rule>) {
     followSets = getFollowSets();
     selectSets = getSelectSets();
     predictTable = getPredictTable();
-    return { firstSets, followSets, selectSets, predictTable, predict };
+    return {
+        firstSets,
+        followSets,
+        selectSets,
+        predictTable,
+        predict,
+        NonTerminals,
+    };
 }

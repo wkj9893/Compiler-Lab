@@ -52,11 +52,10 @@ main {
     flex-direction: column;
 }
 
-.Result {
-    display: flex;
-    flex-direction: column;
-}
-
 .Submit {
     width: max-content;
+}
+
+.table {
+    margin-right: 100px;
 }
