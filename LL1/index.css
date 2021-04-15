@@ -1,0 +1,16 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 30px;
+    align-items: center;
+}
+
+.table {
+    max-height: 480px;
+    margin-top: 48px;
+}
+
+.button {
+    width: fit-content;
+}
