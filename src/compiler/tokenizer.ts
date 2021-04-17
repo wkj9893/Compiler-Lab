@@ -54,7 +54,7 @@ export default function tokenizer(input: string): Array<Token> {
     const DECIMAL = /^([1-9][0-9]*)|^0/;
     const OCTAL = /^0[0-7]*/;
     const HEXADECIMAL = /^0[xX][0-9a-fA-F]*/;
-    const FLOAT = /^([0-9]+\.[0-9]+)|([0-9]*\.[0-9]*[Ee][+-]?[0-9]+)/;
+    const FLOAT = /^([0-9]+\.[0-9]+)|^([0-9]*\.[0-9]*[Ee][+-]?[0-9]+)/;
     const STRING = /^"[^"]*"|^'[^']*'/;
 
     while (current < input.length) {
@@ -107,7 +107,7 @@ export default function tokenizer(input: string): Array<Token> {
         }
 
         if (input.slice(current).match(DECIMAL)) {
-            let value = input.slice(current).match(DECIMAL)![0];
+            const value = input.slice(current).match(DECIMAL)![0];
             current += value.length;
             tokens.push({
                 id: id++,
@@ -121,12 +121,11 @@ export default function tokenizer(input: string): Array<Token> {
         if (input.slice(current).match(STRING)) {
             let value = input.slice(current).match(STRING)![0];
             current += value.length;
-            value = value.slice(1, value.length - 1);
             tokens.push({
                 id: id++,
                 input: value,
                 name: "STRING",
-                value: value,
+                value: value.slice(1, value.length - 1),
             });
             continue;
         }
@@ -285,6 +284,7 @@ export default function tokenizer(input: string): Array<Token> {
                     current++;
                 }
                 line++;
+                current++;
                 continue;
             }
             //  multilne comments
@@ -463,7 +463,7 @@ export default function tokenizer(input: string): Array<Token> {
             }
             continue;
         }
-        console.log(
+        console.error(
             `Lexical error at Line${line} :Type Error! Unrecognized Character: ${char}`
         );
         current++;
