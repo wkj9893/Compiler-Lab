@@ -30,6 +30,12 @@ interface Select {
     set: string;
 }
 
+type Predict = {
+    [key: string]: {
+        [key: string]: number;
+    };
+};
+
 export default function LL1() {
     const [grammar, setGrammar] = useState(input);
     const [rawRules, setRawRules] = useState<Array<Rule>>([]);
@@ -54,35 +60,34 @@ export default function LL1() {
         setLeftFactor(r2);
         setRules(r3);
 
-        let array = [];
+        let array1: Array<FirstFollow> = [];
         for (const Nonterminal of NonTerminals) {
-            array.push({
+            array1.push({
                 Nonterminal,
                 first: firstSets.get(Nonterminal)!.join(" "),
                 follow: followSets.get(Nonterminal)!.join(" "),
             });
         }
-        setFirstFollow(array);
-        array = [];
+        setFirstFollow(array1);
+        let array2: Array<Select> = [];
 
         for (let i = 0; i < r3.length; i++) {
-            array.push({
+            array2.push({
                 id: i,
                 production: `${r3[i].left} -> ${r3[i].right.join(" ")}`,
                 set: selectSets.get(i)!.join(" "),
             });
         }
-        setSelect(array);
-        const temp: any = {};
+        setSelect(array2);
+        const temp: Predict = {};
         for (const Nonterminal of NonTerminals) {
-            let obj: any = {};
+            let obj: { [key: string]: number } = {};
             for (const [key, value] of predictTable.get(Nonterminal)!) {
                 obj[key] = value;
             }
             temp[Nonterminal] = obj;
         }
         setPredict(temp);
-        console.log(JSON.stringify(predict, null, 1));
     }
 
     return (

@@ -241,12 +241,12 @@ export default function parser(rules: Array<Rule>) {
     rules.forEach(({ left }, index) => {
         NonTerminals.add(left);
         selectSets.set(index, []);
-        predictTable.set(left, new Map());
     });
 
     NonTerminals.forEach((NonTerminal) => {
         firstSets.set(NonTerminal, []);
         followSets.set(NonTerminal, []);
+        predictTable.set(NonTerminal, new Map());
     });
 
     function union(arr1: string[], arr2: string[]) {
@@ -376,7 +376,7 @@ export default function parser(rules: Array<Rule>) {
         return selectSets;
     }
 
-    function getPredictTable() {
+    function getPredictTable(): Map<string, Map<string, number>> {
         for (let i = 0; i < rules.length; i++) {
             for (let j = 0; j < selectSets.get(i)!.length; j++) {
                 const key = selectSets.get(i)![j];
@@ -389,6 +389,15 @@ export default function parser(rules: Array<Rule>) {
                         i,
                         "出现冲突"
                     );
+                }
+            }
+        }
+
+        for (const [key, values] of followSets.entries()) {
+            for (const value of values) {
+                if (!predictTable.get(key)?.has(value)) {
+                    //  set syn(同步词法单元)，这里用-1表示SYN
+                    predictTable.get(key)?.set(value, -1);
                 }
             }
         }
@@ -410,38 +419,59 @@ export default function parser(rules: Array<Rule>) {
                 const index = predictTable
                     .get(stack[stack.length - 1])
                     ?.get(tokens[current].name);
-                if (index !== undefined) {
-                    console.log(
-                        `${rules[index].right}替换${stack[stack.length - 1]}`
-                    );
-                    rules[index].right.forEach((value) => {
-                        pushNode(
-                            AST,
-                            stack[stack.length - 1],
-                            value,
-                            AST_current
+                if (typeof index === "number") {
+                    if (index === -1) {
+                        console.log(
+                            `synch,弹出栈顶的非终结符${stack[stack.length - 1]}`
                         );
-                    });
-                    stack.pop();
-                    if (rules[index].right[0] !== "ε") {
-                        const temp = [...rules[index].right].reverse();
-                        stack.push(...temp);
+                        stack.pop();
+                    } else {
+                        console.log(
+                            `${rules[index].right}替换${
+                                stack[stack.length - 1]
+                            }`
+                        );
+                        rules[index].right.forEach((value) => {
+                            pushNode(
+                                AST,
+                                stack[stack.length - 1],
+                                value,
+                                AST_current
+                            );
+                        });
+                        stack.pop();
+                        if (rules[index].right[0] !== "ε") {
+                            const temp = [...rules[index].right].reverse();
+                            stack.push(...temp);
+                        }
                     }
                 } else {
                     console.log(
-                        `匹配不成功,${stack[stack.length - 1]},${
-                            (tokens[current].name, tokens[current].id)
-                        }`
+                        `栈顶非终结符${stack[stack.length - 1]}与当前输入符号${
+                            tokens[current]
+                        }在预测分析表对应项中的信息为空`,
+                        `恐慌模式忽略输入符号${tokens[current]}`
                     );
+                    current++;
                     break;
                 }
             } else {
                 if (stack[stack.length - 1] === tokens[current].name) {
-                    console.log(`弹出${stack[stack.length - 1]}`);
+                    console.log(
+                        `栈顶终结符和当前输入符号匹配,弹出栈顶终结符${
+                            stack[stack.length - 1]
+                        }`
+                    );
                     stack.pop();
                     current++;
                 } else {
-                    console.log("匹配不成功", tokens[current]);
+                    console.log(
+                        `栈顶的终结符${stack[stack.length - 1]}和当前输入符号${
+                            tokens[current]
+                        }不匹配`,
+                        `恐慌模式弹出当前栈底终结符`
+                    );
+
                     break;
                 }
             }
@@ -491,4 +521,25 @@ export default function parser(rules: Array<Rule>) {
         predict,
         NonTerminals,
     };
+}
+
+/**
+ *
+ * @param node AST root node
+ * @returns array of string to be displayed on web page
+ */
+export function printAST(node: Node): Array<string> {
+    let result: Array<string> = [];
+
+    function printAllChildren(node: Node, depth: number = 0): void {
+        result.push(new Array(depth + 1).join("  ") + node.type);
+        if (node.children) {
+            node.children.forEach((child) => {
+                printAllChildren(child, depth + 1);
+            });
+        }
+    }
+    printAllChildren(node);
+
+    return result;
 }

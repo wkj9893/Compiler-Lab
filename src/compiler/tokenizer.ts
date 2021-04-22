@@ -47,7 +47,7 @@ export default function tokenizer(input: string): Array<Token> {
     let id = 1;
 
     // some regex for later use
-    const NUMBER = /^[0-9]/;
+    const NUMBER = /^[0-9]/;                                                  
     const LETTER = /^[a-zA-Z]/;
     const NEWLINE = /^\n/;
     const WHITESPACE = /^\s/;

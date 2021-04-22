@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./App.css";
 import Editor from "@monaco-editor/react";
-import Typography from "@material-ui/core/Typography";
 import { Token, Node } from "./compiler/types";
 import Header from "./components/Header";
 import Table from "@material-ui/core/Table";
@@ -11,11 +10,13 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import { printAST } from "./compiler/parser";
 
 function App() {
-    const [code, setCode] = useState(`for(int i=0;i<10;i++) {
-    print("hello"); 
-    i = ~3;
+    const [code, setCode] = useState(`int inc()
+{
+    int i;
+    i = i + 1;
 }`);
     const [tokens, setTokens] = useState<Array<Token>>([]);
     const [ast, setAst] = useState<Node | null>(null);
@@ -87,7 +88,8 @@ function App() {
             <Editor
                 height="85vh"
                 width="100vh"
-                value={ast ? JSON.stringify(ast, null, 1) : ""}
+                value={ast ? printAST(ast).join("\n") : ""}
+                // value={ast ? JSON.stringify(ast, null, 1) : ""}
                 language="plaintext"
                 options={{ fontSize: "18px" }}
             />
