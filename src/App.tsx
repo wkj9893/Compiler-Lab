@@ -1,30 +1,30 @@
-import React, { useState } from "react";
-import "./App.css";
-import Editor from "@monaco-editor/react";
-import { Token, Node } from "./compiler/types";
-import Header from "./components/Header";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import { printAST } from "./compiler/parser";
+import React, { useState } from "react"
+import "./App.css"
+import Editor from "@monaco-editor/react"
+import { Token, Node } from "./compiler/types"
+import Header from "./components/Header"
+import Table from "@material-ui/core/Table"
+import TableBody from "@material-ui/core/TableBody"
+import TableCell from "@material-ui/core/TableCell"
+import TableContainer from "@material-ui/core/TableContainer"
+import TableHead from "@material-ui/core/TableHead"
+import TableRow from "@material-ui/core/TableRow"
+import Paper from "@material-ui/core/Paper"
+import { printAST } from "./compiler/parser"
 
 function App() {
     const [code, setCode] = useState(`int inc()
 {
     int i;
     i = i + 1;
-}`);
-    const [tokens, setTokens] = useState<Array<Token>>([]);
-    const [ast, setAst] = useState<Node | null>(null);
-    const [lexicalError, setLexicalError] = useState("");
-    const [syntacticError, setSyntacticError] = useState("");
+}`)
+    const [tokens, setTokens] = useState<Array<Token>>([])
+    const [ast, setAst] = useState<Node | null>(null)
+    const [lexicalError, setLexicalError] = useState("")
+    const [syntacticError, setSyntacticError] = useState("")
     const [tableVisibility, setTableVisibility] = useState<
         "hidden" | "visible"
-    >("hidden");
+    >("hidden")
 
     return (
         <div className="App">
@@ -43,7 +43,7 @@ function App() {
                         value={code}
                         onChange={(value) => {
                             if (value) {
-                                setCode(value);
+                                setCode(value)
                             }
                         }}
                         language="c"
@@ -94,7 +94,7 @@ function App() {
                 options={{ fontSize: "18px" }}
             />
         </div>
-    );
+    )
 }
 
-export default App;
+export default App
