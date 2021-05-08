@@ -78,6 +78,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: value,
                 name: "FLOAT",
                 value: value,
+                line,
             })
             continue
         }
@@ -90,6 +91,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: value,
                 name: "INT",
                 value: value,
+                line,
             })
             continue
         }
@@ -102,6 +104,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: value,
                 name: "INT",
                 value: value,
+                line,
             })
             continue
         }
@@ -114,6 +117,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: value,
                 name: "INT",
                 value: value,
+                line,
             })
             continue
         }
@@ -126,6 +130,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: value,
                 name: "STRING",
                 value: value.slice(1, value.length - 1),
+                line,
             })
             continue
         }
@@ -136,6 +141,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: ";",
                 name: "SEMI",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -147,6 +153,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: ",",
                 name: "COMMA",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -160,6 +167,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "==",
                     name: "RELOP",
                     value: "==",
+                    line,
                 })
                 current = next + 1
                 continue
@@ -169,6 +177,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "=",
                     name: "ASSIGNOP",
                     value: "_",
+                    line,
                 })
                 current++
                 continue
@@ -182,6 +191,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "!=",
                     name: "RELOP",
                     value: "!=",
+                    line,
                 })
                 current = next + 1
                 continue
@@ -196,6 +206,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: char + "=",
                     name: "RELOP",
                     value: char + "=",
+                    line,
                 })
                 current = next + 1
                 continue
@@ -205,6 +216,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: char,
                     name: "RELOP",
                     value: char,
+                    line,
                 })
                 current++
                 continue
@@ -219,6 +231,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "++",
                     name: "INCREMENT",
                     value: "_",
+                    line,
                 })
                 current = next + 1
                 continue
@@ -228,6 +241,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "+",
                     name: "PLUS",
                     value: "_",
+                    line,
                 })
                 current++
                 continue
@@ -241,6 +255,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "--",
                     name: "DECREMENT",
                     value: "_",
+                    line,
                 })
                 current = next + 1
                 continue
@@ -250,6 +265,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "-",
                     name: "MINUS",
                     value: "_",
+                    line,
                 })
                 current++
                 continue
@@ -261,6 +277,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "*",
                 name: "STAR",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -271,6 +288,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "*",
                 name: "MOD",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -309,6 +327,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: "/",
                     name: "DIV",
                     value: "_",
+                    line,
                 })
                 current++
                 continue
@@ -321,6 +340,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "&&",
                 name: "AND",
                 value: "_",
+                line,
             })
             current += 2
             continue
@@ -331,6 +351,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "||",
                 name: "OR",
                 value: "_",
+                line,
             })
             current += 2
             continue
@@ -341,6 +362,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: ".",
                 name: "DOT",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -351,6 +373,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "!",
                 name: "NOT",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -361,6 +384,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "(",
                 name: "LP",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -372,6 +396,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: ")",
                 name: "RP",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -382,6 +407,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "[",
                 name: "LB",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -392,6 +418,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "]",
                 name: "RB",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -403,6 +430,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "{",
                 name: "LC",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -413,6 +441,7 @@ export default function tokenizer(input: string): Array<Token> {
                 input: "}",
                 name: "RC",
                 value: "_",
+                line,
             })
             current++
             continue
@@ -444,6 +473,7 @@ export default function tokenizer(input: string): Array<Token> {
                         input: value,
                         name: "TYPE",
                         value: "_",
+                        line,
                     })
                 } else {
                     tokens.push({
@@ -451,6 +481,7 @@ export default function tokenizer(input: string): Array<Token> {
                         input: value,
                         name: value.toUpperCase(),
                         value: "_",
+                        line,
                     })
                 }
             } else {
@@ -459,6 +490,7 @@ export default function tokenizer(input: string): Array<Token> {
                     input: value,
                     name: "ID",
                     value: value,
+                    line,
                 })
             }
             continue

@@ -409,6 +409,7 @@ export default function parser(rules: Array<Rule>) {
             input: "$",
             name: "$",
             value: "$",
+            line: 1,
         })
         let stack = ["$", rules[0].left]
         let current = 0
@@ -419,7 +420,7 @@ export default function parser(rules: Array<Rule>) {
                     ?.get(tokens[current].name)
                 if (typeof index === "number") {
                     if (index === -1) {
-                        console.log(
+                        console.warn(
                             `synch,弹出栈顶的非终结符${stack[stack.length - 1]}`
                         )
                         stack.pop()
@@ -445,6 +446,9 @@ export default function parser(rules: Array<Rule>) {
                     }
                 } else {
                     console.warn(
+                        `Syntax error at Line ${tokens[current].line}: `
+                    )
+                    console.warn(
                         `栈顶非终结符${stack[stack.length - 1]}与当前输入符号${
                             tokens[current].name
                         }在预测分析表对应项中的信息为空`,
@@ -463,6 +467,9 @@ export default function parser(rules: Array<Rule>) {
                     stack.pop()
                     current++
                 } else {
+                    console.warn(
+                        `Syntax error at Line ${tokens[current].line}: `
+                    )
                     console.warn(
                         `栈顶的终结符${stack[stack.length - 1]}和当前输入符号${
                             tokens[current].name
@@ -522,7 +529,7 @@ export default function parser(rules: Array<Rule>) {
 }
 
 /**
- *
+ * preorder AST traversal
  * @param node AST root node
  * @returns array of string to be displayed on web page
  */

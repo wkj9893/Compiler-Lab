@@ -3,6 +3,7 @@ export interface Token {
     input: string
     name: string
     value: string
+    line: number
 }
 
 export interface Rule {
