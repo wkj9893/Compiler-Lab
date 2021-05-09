@@ -74,7 +74,7 @@ void test1(int a) {
     >("hidden")
 
     return (
-        <div className="App">
+        <>
             <Header
                 code={code}
                 setCode={setCode}
@@ -82,7 +82,7 @@ void test1(int a) {
                 setAst={setAst}
                 setTableVisibility={setTableVisibility}
             />
-            <main>
+            <div className="container">
                 <div className="Editor">
                     <Editor
                         height="80vh"
@@ -131,16 +131,25 @@ void test1(int a) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </main>
-            <Editor
-                height="85vh"
-                width="100vh"
-                value={ast ? printAST(ast).join("\n") : ""}
-                // value={ast ? JSON.stringify(ast, null, 1) : ""}
-                language="plaintext"
-                options={{ fontSize: "18px" }}
-            />
-        </div>
+            </div>
+            <div className="container">
+                <Editor
+                    height="85vh"
+                    width="100vh"
+                    value={ast ? printAST(ast).join("\n") : ""}
+                    // value={ast ? JSON.stringify(ast, null, 1) : ""}
+                    language="plaintext"
+                    options={{ fontSize: "18px" }}
+                />
+                <Editor
+                    height="85vh"
+                    width="100vh"
+                    value={ast ? JSON.stringify(ast, null, 1) : ""}
+                    language="plaintext"
+                    options={{ fontSize: "18px" }}
+                />
+            </div>
+        </>
     )
 }
 

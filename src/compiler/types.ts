@@ -16,3 +16,8 @@ export interface Node {
     children?: Array<Node>
     value?: string
 }
+
+export interface Symbol {
+    name: string
+    type: string
+}

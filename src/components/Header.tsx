@@ -80,6 +80,15 @@ export default function Header(props: HeaderProps) {
                         语法分析
                     </Typography>
                 </Button>
+                <Button
+                    onClick={() => {
+                        props.setAst(predict(tokenizer(props.code)))
+                    }}
+                >
+                    <Typography variant="h6" style={{ fontSize: "18px" }}>
+                        语义分析
+                    </Typography>
+                </Button>
             </Toolbar>
         </AppBar>
     )

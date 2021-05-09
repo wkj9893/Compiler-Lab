@@ -402,8 +402,9 @@ export default function parser(rules: Array<Rule>) {
         return predictTable
     }
     function predict(tokens: Array<Token>): Node {
-        let AST: Node = { type: rules[0].left }
-        let AST_current = 0
+        const root: Node = { type: rules[0].left }
+        const array = [root]
+        console.log(array, array.length)
         tokens.push({
             id: tokens.length,
             input: "$",
@@ -411,10 +412,11 @@ export default function parser(rules: Array<Rule>) {
             value: "$",
             line: 1,
         })
-        let stack = ["$", rules[0].left]
+        const stack = ["$", rules[0].left]
         let current = 0
         while (stack.length > 1 && current < tokens.length) {
             if (isNonterminal(stack[stack.length - 1])) {
+                console.log("非终结符", stack[stack.length - 1])
                 const index = predictTable
                     .get(stack[stack.length - 1])
                     ?.get(tokens[current].name)
@@ -430,19 +432,16 @@ export default function parser(rules: Array<Rule>) {
                                 stack[stack.length - 1]
                             }`
                         )
+                        const temp: Node[] = []
                         rules[index].right.forEach((value) => {
-                            pushNode(
-                                AST,
-                                stack[stack.length - 1],
-                                value,
-                                AST_current
-                            )
+                            temp.push({ type: value })
                         })
+                        array[0].children = temp
+                        console.log(array[0], temp)
+                        array.shift()
+                        array.unshift(...temp)
                         stack.pop()
-                        if (rules[index].right[0] !== "ε") {
-                            const temp = [...rules[index].right].reverse()
-                            stack.push(...temp)
-                        }
+                        stack.push(...[...rules[index].right].reverse())
                     }
                 } else {
                     console.warn(
@@ -457,6 +456,11 @@ export default function parser(rules: Array<Rule>) {
                     current++
                 }
             } else {
+                if (stack[stack.length - 1] === "ε") {
+                    array.shift()
+                    stack.pop()
+                    continue
+                }
                 if (stack[stack.length - 1] === tokens[current].name) {
                     console.log(
                         `栈顶终结符${stack[stack.length - 1]}和当前输入符号${
@@ -464,6 +468,7 @@ export default function parser(rules: Array<Rule>) {
                         }匹配`,
                         `弹出栈顶终结符${stack[stack.length - 1]}`
                     )
+                    array.shift()
                     stack.pop()
                     current++
                 } else {
@@ -476,6 +481,7 @@ export default function parser(rules: Array<Rule>) {
                         }不匹配`,
                         `恐慌模式弹出当前栈底终结符${stack[stack.length - 1]}`
                     )
+                    array.shift()
                     stack.pop()
                     current++
                 }
@@ -484,34 +490,7 @@ export default function parser(rules: Array<Rule>) {
         if (current === tokens.length - 1) {
             console.log("匹配完成")
         }
-        return AST
-
-        //  dfs search
-        function pushNode(
-            AST: Node,
-            target: string,
-            value: string,
-            current: number
-        ) {
-            if (current !== AST_current) {
-                return
-            }
-            if (AST.type === target) {
-                if (AST.children) {
-                    AST.children.push({ type: value })
-                } else {
-                    AST.children = [{ type: value }]
-                }
-                AST_current++
-                return
-            } else {
-                if (AST.children) {
-                    AST.children.forEach((child) => {
-                        pushNode(child, target, value, current)
-                    })
-                }
-            }
-        }
+        return root
     }
 
     firstSets = getFristSets()
@@ -537,11 +516,13 @@ export function printAST(node: Node): Array<string> {
     let result: Array<string> = []
 
     function printAllChildren(node: Node, depth: number = 0): void {
-        result.push(new Array(depth + 1).join("  ") + node.type)
         if (node.children) {
+            result.push(new Array(depth + 1).join("    ") + node.type)
             node.children.forEach((child) => {
                 printAllChildren(child, depth + 1)
             })
+        } else {
+            result.push(new Array(depth + 1).join("    ") + node.type)
         }
     }
     printAllChildren(node)
