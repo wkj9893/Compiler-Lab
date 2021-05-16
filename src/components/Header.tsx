@@ -6,6 +6,7 @@ import Button from "@material-ui/core/Button"
 import tokenizer from "../compiler/tokenizer"
 import { Token, Node } from "../compiler/types"
 import parser, { rules } from "../compiler/parser"
+import Analyzer from "../compiler/semantic-analyzer"
 
 interface HeaderProps {
     code: string
@@ -83,6 +84,9 @@ export default function Header(props: HeaderProps) {
                 <Button
                     onClick={() => {
                         props.setAst(predict(tokenizer(props.code)))
+                        console.clear()
+                        const root = predict(tokenizer(props.code))
+                        const a = new Analyzer(root)
                     }}
                 >
                     <Typography variant="h6" style={{ fontSize: "18px" }}>

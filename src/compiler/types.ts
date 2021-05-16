@@ -13,11 +13,12 @@ export interface Rule {
 
 export interface Node {
     type: string
-    children?: Array<Node>
-    value?: string
+    line: number
+    children: Array<Node>
+    value: string
 }
 
 export interface Symbol {
-    name: string
-    type: string
+    type: string | Map<string, Symbol>
+    typeString: string
 }

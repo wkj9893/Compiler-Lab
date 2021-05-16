@@ -1,100 +1,41 @@
 import { Token, Rule, Node } from "./types"
 
-export const input = `P -> P'
-P' -> common commons
-commons -> common commons
-commons -> ε
-common -> TYPE ID after_part
-common -> STRUCT ID struct_body SEMI
-struct_body -> LC struct_define struct_defines RC
-struct_defines -> struct_define struct_defines
-struct_defines -> ε
-struct_define -> TYPE ID array_part SEMI
-array_part -> LB const RB
-after_part -> LP args RP func_body
-after_part -> init vars SEMI
-array_part -> ε
-args -> TYPE ID arg
-args -> ε
-arg -> COMMA TYPE ID arg
-arg -> ε
-func_body -> SEMI
-func_body -> block
-block -> LC define_stmts stmts RC
-define_stmts -> define_stmt define_stmts
-define_stmts -> ε
-define_stmt -> TYPE ID init vars SEMI
-define_stmt -> STRUCT ID ID SEMI
-init -> ASSIGNOP expression
-init -> array_part
-init -> ε
-vars -> COMMA ID init vars
-vars -> ε
-stmts -> stmt stmts
-stmts -> ε
-stmt -> assign_stmt
-stmt -> jump_stmt
-stmt -> iteration_stmt
-stmt -> if_stmt
-stmt -> switch_stmt
-assign_stmt -> expression SEMI
-jump_stmt -> CONTINUE SEMI
-jump_stmt -> BREAK SEMI
-jump_stmt -> RETURN isnull_expr SEMI
-iteration_stmt -> WHILE LP logical_expression RP block
-iteration_stmt -> FOR LP isnull_expr SEMI isnull_expr SEMI isnull_expr RP block
-iteration_stmt -> DO block WHILE LP logical_expression RP SEMI
-if_stmt -> IF LP logical_expression RP block result
-result -> ELSE after_else
-result -> ε
-after_else -> block
-after_else -> if_stmt
-switch_stmt -> SWITCH LP value RP LC case_stmt case_stmts default_stmt RC
-case_stmts -> case_stmt case_stmts
-case_stmts -> ε
-case_stmt -> CASE const : stmts
-default_stmt -> DEFAULT : stmts
-default_stmt -> ε
-logical_expression -> ! expression bool_expression
-logical_expression -> expression bool_expression
-bool_expression -> lop expression bool_expression
-bool_expression -> ε
-lop -> AND
-lop -> OR
-isnull_expr -> expression
-isnull_expr -> ε
-expression -> value operation
-operation -> RELOP value
-operation -> ASSIGNOP value
-operation -> INCREMENT
-operation -> DECREMENT
-operation -> ε
-value -> item value'
-value' -> PLUS item value'
-value' -> MINUS item value'
-value' -> ε
-item -> factor item'
-item' -> STAR factor item'
-item' -> DIV factor item'
-item' -> MOD factor item'
-item' -> ε
-factor -> LP value RP
-factor -> ID factor'
-factor -> const
-factor' -> array_part
-factor' -> call_func
-factor' -> DOT ID
-factor' -> ε
-call_func -> LP es RP
-es -> expression eps
-es -> ε
-eps -> COMMA expression eps
-eps -> ε
-const -> INT
-const -> FLOAT
-const -> STRING`
+// Expression -> Expression' Expression
+export const input = `Program -> ε
+Program -> VariableDeclaration SEMI Program
+Program -> StructDeclaration SEMI Program
+Program -> Assignment SEMI Program
+Program -> IfStatement Program
+Program -> WhileStatement Program
+Program -> DoWhileStatement SEMI Program
 
-export const rules = removeLeftRecursion(leftFactoring(parseRules(input)))
+StructDeclaration -> STRUCT ID LC StructBody RC
+StructBody -> TYPE ID SEMI StructBody
+StructBody -> ε
+
+VariableDeclaration -> TYPE ID Init
+VariableDeclaration -> ID Init
+Init -> ASSIGNOP Expression
+Init -> ε
+Init -> LB INT RB Init
+
+
+Expression -> Expression AND Expression
+Expression -> Expression OR Expression
+Expression -> Expression RELOP Expression
+Expression -> Expression PLUS Expression
+Expression -> Expression MINUS Expression
+Expression -> Expression STAR Expression
+Expression -> Expression DIV Expression
+Expression -> INT
+Expression -> FLOAT
+
+IfStatement -> IF LP Expression RP LC Program RC ELSE LC Program RC
+WhileStatement -> WHILE LP Expression RP ExpressionStatement
+DoWhileStatement -> DO LC Program RC WHILE LP Expression RP
+`
+
+export const rules = parseRules(input)
 
 /**
  * parse rules to raw input
@@ -402,24 +343,87 @@ export default function parser(rules: Array<Rule>) {
         return predictTable
     }
     function predict(tokens: Array<Token>): Node {
-        const root: Node = { type: rules[0].left }
-        const array = [root]
-        console.log(array, array.length)
+        if (tokens[0].name === "TYPE") {
+            tokens[0].value
+        }
+        const root = {
+            type: "Program",
+            line: 1,
+            children: [],
+            value: "",
+        }
+        const array: Array<Node> = [root]
         tokens.push({
             id: tokens.length,
             input: "$",
             name: "$",
-            value: "$",
-            line: 1,
+            value: "",
+            line: tokens[tokens.length - 1].line,
         })
+        const set = new Set([
+            "AND",
+            "OR",
+            "RELOP",
+            "PLUS",
+            "MINUS",
+            "STAR",
+            "DIV",
+        ])
         const stack = ["$", rules[0].left]
         let current = 0
         while (stack.length > 1 && current < tokens.length) {
+            const [token, nextToken] = [tokens[current], tokens[current + 1]]
+            const line = token.line
             if (isNonterminal(stack[stack.length - 1])) {
-                console.log("非终结符", stack[stack.length - 1])
+                if (array[0].type === "Expression") {
+                    if (set.has(nextToken.name)) {
+                        const temp: Node[] = [
+                            {
+                                type: token.name,
+                                line,
+                                children: [],
+                                value: token.value,
+                            },
+                            {
+                                type: nextToken.name,
+                                line,
+                                children: [],
+                                value: nextToken.value,
+                            },
+                            {
+                                type: "Expression",
+                                line,
+                                children: [],
+                                value: "",
+                            },
+                        ]
+                        array[0].children = temp
+                        array[0].line = line
+                        array.shift()
+                        array.unshift(temp[2])
+                        current += 2
+                        continue
+                    } else {
+                        array[0].children = [
+                            {
+                                type: token.name,
+                                line,
+                                children: [],
+                                value: token.value,
+                            },
+                        ]
+                        array[0].line = line
+
+                        array.shift()
+                        stack.pop()
+                        current++
+                        continue
+                    }
+                }
+
                 const index = predictTable
                     .get(stack[stack.length - 1])
-                    ?.get(tokens[current].name)
+                    ?.get(token.name)
                 if (typeof index === "number") {
                     if (index === -1) {
                         console.warn(
@@ -434,53 +438,58 @@ export default function parser(rules: Array<Rule>) {
                         )
                         const temp: Node[] = []
                         rules[index].right.forEach((value) => {
-                            temp.push({ type: value })
+                            temp.push({
+                                type: value,
+                                line: 0,
+                                children: [],
+                                value: "",
+                            })
                         })
                         array[0].children = temp
-                        console.log(array[0], temp)
+                        array[0].line = line
                         array.shift()
                         array.unshift(...temp)
                         stack.pop()
                         stack.push(...[...rules[index].right].reverse())
                     }
                 } else {
-                    console.warn(
-                        `Syntax error at Line ${tokens[current].line}: `
-                    )
+                    console.warn(`Syntax error at Line ${token.line}: `)
                     console.warn(
                         `栈顶非终结符${stack[stack.length - 1]}与当前输入符号${
-                            tokens[current].name
+                            token.name
                         }在预测分析表对应项中的信息为空`,
-                        `恐慌模式忽略输入符号${tokens[current].name}`
+                        `恐慌模式忽略输入符号${token.name}`
                     )
                     current++
                 }
             } else {
                 if (stack[stack.length - 1] === "ε") {
+                    array[0].line = line
                     array.shift()
                     stack.pop()
                     continue
                 }
-                if (stack[stack.length - 1] === tokens[current].name) {
+                if (stack[stack.length - 1] === token.name) {
                     console.log(
                         `栈顶终结符${stack[stack.length - 1]}和当前输入符号${
-                            tokens[current].name
+                            token.name
                         }匹配`,
                         `弹出栈顶终结符${stack[stack.length - 1]}`
                     )
+                    array[0].value = token.value
+                    array[0].line = line
                     array.shift()
                     stack.pop()
                     current++
                 } else {
-                    console.warn(
-                        `Syntax error at Line ${tokens[current].line}: `
-                    )
+                    console.warn(`Syntax error at Line ${line}: `)
                     console.warn(
                         `栈顶的终结符${stack[stack.length - 1]}和当前输入符号${
-                            tokens[current].name
+                            token.name
                         }不匹配`,
                         `恐慌模式弹出当前栈底终结符${stack[stack.length - 1]}`
                     )
+                    array[0].line = line
                     array.shift()
                     stack.pop()
                     current++
@@ -490,6 +499,7 @@ export default function parser(rules: Array<Rule>) {
         if (current === tokens.length - 1) {
             console.log("匹配完成")
         }
+
         return root
     }
 
@@ -516,13 +526,13 @@ export function printAST(node: Node): Array<string> {
     let result: Array<string> = []
 
     function printAllChildren(node: Node, depth: number = 0): void {
+        result.push(
+            new Array(depth + 1).join("    ") + node.type + `(${node.line})`
+        )
         if (node.children) {
-            result.push(new Array(depth + 1).join("    ") + node.type)
-            node.children.forEach((child) => {
+            node.children!.forEach((child) => {
                 printAllChildren(child, depth + 1)
             })
-        } else {
-            result.push(new Array(depth + 1).join("    ") + node.type)
         }
     }
     printAllChildren(node)

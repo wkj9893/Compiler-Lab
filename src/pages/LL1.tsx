@@ -37,7 +37,99 @@ type Predict = {
 }
 
 export default function LL1() {
-    const [grammar, setGrammar] = useState(input)
+    const [grammar, setGrammar] = useState(`P -> P'
+P' -> common commons
+commons -> common commons
+commons -> ε
+common -> TYPE ID after_part
+common -> STRUCT ID struct_body SEMI
+struct_body -> LC struct_define struct_defines RC
+struct_defines -> struct_define struct_defines
+struct_defines -> ε
+struct_define -> TYPE ID array_part SEMI
+array_part -> LB const RB
+after_part -> LP args RP func_body
+after_part -> init vars SEMI
+array_part -> ε
+args -> TYPE ID arg
+args -> ε
+arg -> COMMA TYPE ID arg
+arg -> ε
+func_body -> SEMI
+func_body -> block
+block -> LC define_stmts stmts RC
+define_stmts -> define_stmt define_stmts
+define_stmts -> ε
+define_stmt -> TYPE ID init vars SEMI
+define_stmt -> STRUCT ID ID SEMI
+init -> ASSIGNOP expression
+init -> array_part
+init -> ε
+vars -> COMMA ID init vars
+vars -> ε
+stmts -> stmt stmts
+stmts -> ε
+stmt -> assign_stmt
+stmt -> jump_stmt
+stmt -> iteration_stmt
+stmt -> if_stmt
+stmt -> switch_stmt
+assign_stmt -> expression SEMI
+jump_stmt -> CONTINUE SEMI
+jump_stmt -> BREAK SEMI
+jump_stmt -> RETURN isnull_expr SEMI
+iteration_stmt -> WHILE LP logical_expression RP block
+iteration_stmt -> FOR LP isnull_expr SEMI isnull_expr SEMI isnull_expr RP block
+iteration_stmt -> DO block WHILE LP logical_expression RP SEMI
+if_stmt -> IF LP logical_expression RP block result
+result -> ELSE after_else
+result -> ε
+after_else -> block
+after_else -> if_stmt
+switch_stmt -> SWITCH LP value RP LC case_stmt case_stmts default_stmt RC
+case_stmts -> case_stmt case_stmts
+case_stmts -> ε
+case_stmt -> CASE const : stmts
+default_stmt -> DEFAULT : stmts
+default_stmt -> ε
+logical_expression -> ! expression bool_expression
+logical_expression -> expression bool_expression
+bool_expression -> lop expression bool_expression
+bool_expression -> ε
+lop -> AND
+lop -> OR
+isnull_expr -> expression
+isnull_expr -> ε
+expression -> value operation
+operation -> RELOP value
+operation -> ASSIGNOP value
+operation -> INCREMENT
+operation -> DECREMENT
+operation -> ε
+value -> item value'
+value' -> PLUS item value'
+value' -> MINUS item value'
+value' -> ε
+item -> factor item'
+item' -> STAR factor item'
+item' -> DIV factor item'
+item' -> MOD factor item'
+item' -> ε
+factor -> LP value RP
+factor -> ID factor'
+factor -> const
+factor' -> array_part
+factor' -> call_func
+factor' -> DOT ID
+factor' -> ε
+call_func -> LP es RP
+es -> expression eps
+es -> ε
+eps -> COMMA expression eps
+eps -> ε
+const -> INT
+const -> FLOAT
+const -> STRING`)
     const [rawRules, setRawRules] = useState<Array<Rule>>([])
     const [leftFactor, setLeftFactor] = useState<Array<Rule>>([])
     const [rules, setRules] = useState<Array<Rule>>([])

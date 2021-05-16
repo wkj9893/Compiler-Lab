@@ -13,65 +13,33 @@ import Paper from "@material-ui/core/Paper"
 import { printAST } from "./compiler/parser"
 
 function App() {
-    const [code, setCode] = useState(`int a = 0;
-char array[12];
-char 1a;        //语法错误
-    
-int test();
-void test1(int a);
-    
-struct abc {
-    int a;
-    char b;
-    long c;
+    const [code, setCode] = useState(`int x;
+int y;
+int z;
+float c;
+float d;
+int x;          //变量重复声明
+m = 3;          //变量未经声明就使用
+char name[50][20][100];
+struct Distance
+{
+    int feet;
+    float inch;
 };
-    
-int main() {
-    int d = 0;
-    struct abc d;
-    array[0] = 'a';
-    d.a = 10;
-    for(a = 0; a < 10; a ++) {
-        printf(a);
+        
+do{
+    if(c < d) {
+        x = y + z;
+    }else {
+        x = y - z;
     }
-    d = test();
-    do {
-        test1(d);
-        d --;
-    } while(d > 0);
-    if(d == a) {
-        printf(d);
-    }
-    return 0;
-}
-    
-int b = 12;
-    
-int test() {
-    int c = b+1;
-    printf(b);
-    return c;
-}
-    
-struct abcd {
-    int a;
-    char b;
-    long c[12];
-};
-    
-void test1(int a) {
-    struct abcd t;
-    t.b = 'b';
-    printf(a);
-    return;
-}`)
+}while(a<b);`)
     const [tokens, setTokens] = useState<Array<Token>>([])
     const [ast, setAst] = useState<Node | null>(null)
     const [lexicalError, setLexicalError] = useState("")
     const [syntacticError, setSyntacticError] = useState("")
-    const [tableVisibility, setTableVisibility] = useState<
-        "hidden" | "visible"
-    >("hidden")
+    const [tableVisibility, setTableVisibility] =
+        useState<"hidden" | "visible">("hidden")
 
     return (
         <>
@@ -139,14 +107,14 @@ void test1(int a) {
                     value={ast ? printAST(ast).join("\n") : ""}
                     // value={ast ? JSON.stringify(ast, null, 1) : ""}
                     language="plaintext"
-                    options={{ fontSize: "18px" }}
+                    options={{ fontSize: "16px" }}
                 />
                 <Editor
                     height="85vh"
                     width="100vh"
                     value={ast ? JSON.stringify(ast, null, 1) : ""}
-                    language="plaintext"
-                    options={{ fontSize: "18px" }}
+                    language="json"
+                    options={{ fontSize: "16px" }}
                 />
             </div>
         </>
